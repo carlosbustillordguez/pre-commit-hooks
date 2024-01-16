@@ -1,0 +1,57 @@
+name: Common Issues Check
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*
+
+      - name: Get changed files
+        id: file_changes
+        run: |
+          export DIFF=$(git diff --name-only origin/${{ github.base_ref }} ${{ github.sha }})
+          echo "Diff between ${{ github.base_ref }} and ${{ github.sha }}"
+          echo "files=$( echo "$DIFF" | xargs echo )" >> $GITHUB_OUTPUT
+
+      - name: Install shfmt
+        run: |
+          curl -L "$(curl -s https://api.github.com/repos/mvdan/sh/releases/latest | grep -o -E -m 1 "https://.+?linux_amd64")" > shfmt \
+          && chmod +x shfmt && sudo mv shfmt /usr/bin/
+
+      - name: Install shellcheck
+        run: |
+          sudo apt update && sudo apt install shellcheck
+
+      # Need to success pre-commit fix push
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Execute pre-commit
+        uses: pre-commit/action@v2.0.3
+        env:
+          # We don't want to enforce conventional commits at the commit message level,
+          # it's enforced at the PR title level with pr-title-check.yml
+          SKIP: commitlint
+        with:
+          # Push back fixes to the pull request branch due to the 'token' argument
+          # This option is only valid for pre-commit/action@v2.0.3
+          token: ${{ secrets.GITHUB_TOKEN }}
+          extra_args: --color=always --show-diff-on-failure --files ${{ steps.file_changes.outputs.files }}
+      - name: Execute pre-commit check that have no auto-fixes
+        if: always()
+        uses: pre-commit/action@v2.0.3
+        env:
+          SKIP: check-added-large-files,check-merge-conflict,check-vcs-permalinks,end-of-file-fixer,trailing-whitespace,check-yaml,check-merge-conflict,check-executables-have-shebangs,check-case-conflict,mixed-line-ending,detect-aws-credentials,detect-private-key,commitlint,shfmt
+        with:
+          extra_args: --color=always --show-diff-on-failure --files ${{ steps.file_changes.outputs.files }}

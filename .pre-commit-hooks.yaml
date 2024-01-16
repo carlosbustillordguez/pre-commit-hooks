@@ -1,0 +1,19 @@
+---
+# This file tells https://pre-commit.com/ which hooks are provided by this repo for use by other git repos.
+
+- id: helmfilelint
+  name: helmfilelint
+  description: Lint helmfile files by executing helmfile lint command.
+  entry: hooks/helmfilelint.sh
+  language: script
+  types: [yaml]
+  require_serial: true
+
+- id: biceplint
+  name: biceplint
+  description: Lint bicep files by executing az bicep lint command.
+  entry: hooks/biceplint.sh
+  language: script
+  types: [file]
+  files: \.bicep$
+  require_serial: true
