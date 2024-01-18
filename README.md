@@ -27,6 +27,8 @@ A collection of git hooks intended for use with [pre-commit](https://pre-commit.
 
     ```bash
     cat <<EOF > .pre-commit-config.yaml
+    default_stages: [commit]
+
     repos:
     - repo: https://github.com/carlosbustillordguez/pre-commit-hooks
       rev: <VERSION> # Get the latest from: https://github.com/carlosbustillordguez/pre-commit-hooks/releases
