@@ -11,8 +11,17 @@
 
 - id: biceplint
   name: biceplint
-  description: Lint bicep files by executing az bicep lint command.
+  description: Lint Bicep files by executing az bicep lint command.
   entry: hooks/biceplint.sh
+  language: script
+  types: [file]
+  files: \.bicep$
+  require_serial: true
+
+- id: bicepfmt
+  name: bicepfmt
+  description: Format Bicep files by executing az bicep format command.
+  entry: hooks/bicepfmt.sh
   language: script
   types: [file]
   files: \.bicep$
