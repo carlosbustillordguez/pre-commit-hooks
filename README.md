@@ -16,6 +16,7 @@ A collection of git hooks intended for use with [pre-commit](https://pre-commit.
       - [Disable color output](#disable-color-output)
     - [helmfilelint](#helmfilelint)
     - [biceplint](#biceplint)
+    - [bicepfmt](#bicepfmt)
   - [License](#license)
   - [Author Information](#author-information)
 
@@ -63,6 +64,7 @@ Now whenever you clone/create a pre-commit enabled repository, the hooks will al
 |-----------|-------------|---------------|
 | `helmfilelint` | Lint `helmfile` files by executing `helmfile lint` command. | `helmfile` tool. See the [installation steps](https://helmfile.readthedocs.io/en/latest/#installation) from the official documentation. |
 | `biceplint` | Lint `.bicep` files by executing `az bicep lint` command. | `az` CLI. See the [installation steps](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/install#azure-cli) from the official documentation. |
+| `bicepfmt` | Format `.bicep` files by executing `az bicep format` command. | `az` CLI. See the [installation steps](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/install#azure-cli) from the official documentation. |
 
 ## Hooks usage notes and examples
 
@@ -130,7 +132,7 @@ PRE_COMMIT_COLOR=never pre-commit run
     - --file=helmfile-customs/components.yaml
 ```
 
-> **NOTE**: the `f | --file` arguments are also available as part of `--args=--file=foo.yaml` but is the only argument that cannot be used with `--args` because the hook doesn't expect custom files as part of arguments, but as part of `-f | file` does.
+> **NOTE**: the `-f | --file` arguments are also available as part of `--args=--file=foo.yaml` but is the only argument that cannot be used with `--args` because the hook doesn't expect custom files as part of arguments, but as part of `-f | file` does.
 
 If you are using [Azure Container Registry](https://learn.microsoft.com/en-us/azure/container-registry/) to store private Helm chart as OCI artifacts, you will need to login into ACR first to lint the charts. The following approach export the needed environment variables to allow `helmfile` login into ACR:
 
@@ -148,6 +150,24 @@ If you are using [Azure Container Registry](https://learn.microsoft.com/en-us/az
 ```yaml
 - id: biceplint
 ```
+
+**NOTE:**
+
+- The `-f | --file` arguments cannot be used with `--args`.
+
+### bicepfmt
+
+`bicepfmt` will format all files with `.bicep` extension. To enable it, add:
+
+```yaml
+- id: bicepfmt
+  args:
+    - --args=--insert-final-newline
+```
+
+**NOTE:**
+
+- The `-f | --file` arguments cannot be used with `--args`.
 
 ## License
 

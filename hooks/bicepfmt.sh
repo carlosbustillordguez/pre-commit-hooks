@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-# Run `az bicep lint` command on a given bicep file.
+# Run `az bicep format` command on a given bicep file.
 
 # globals variables
 # shellcheck disable=SC2155 # No way to assign to readonly variable in separate lines
@@ -10,13 +10,13 @@ readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 . "$SCRIPT_DIR/_common.sh"
 
 #######################################################################
-# Lint the given Bicep files.
+# Format the given Bicep files.
 # Arguments:
 #   args_array_length (integer) Count of arguments in args array
 #   args (string with array) arguments that configure wrapped tool behavior
 #   files (array) filenames to check
 #######################################################################
-function biceplint {
+function bicepfmt {
   local -i args_array_length=$1
   shift 1
   local -a args=()
@@ -31,7 +31,7 @@ function biceplint {
   local -a -r files=("$@")
 
   if ! command -v az > /dev/null 2>&1; then
-    echo "ERROR: az CLI is required by biceplint pre-commit hook but is not installed or in the system's PATH."
+    echo "ERROR: az CLI is required by bicepfmt pre-commit hook but is not installed or in the system's PATH."
     echo 'See https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/install#azure-cli'
     exit 1
   fi
@@ -49,8 +49,8 @@ function biceplint {
     # move to the $dir_path
     pushd "$dir_path" > /dev/null || continue
 
-    echo "#### Linting $file_with_path ####"
-    az bicep lint --file "$file_name" "${args[@]}"
+    echo "#### Formating $file_with_path ####"
+    az bicep format --file "$file_name" "${args[@]}"
     echo ""
 
     # get back the previous directory
@@ -65,7 +65,7 @@ function main {
   common::parse_and_export_env_vars
 
   # shellcheck disable=SC2153 # ARGS and FILES are correctly assigned
-  biceplint "${#ARGS[@]}" "${ARGS[@]}" "${FILES[@]}"
+  bicepfmt "${#ARGS[@]}" "${ARGS[@]}" "${FILES[@]}"
 }
 
 [ "${BASH_SOURCE[0]}" != "$0" ] || main "$@"
